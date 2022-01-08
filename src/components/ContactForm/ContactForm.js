@@ -29,23 +29,19 @@ export default function ContactForm({ onSubmit }) {
     }
   };
 
-  const handleSubmit = event => {
-    event.preventDefault();
+  const handleSubmit = e => {
+    e.preventDefault();
+    const nameInContact = name.toLowerCase().trim();
+    const contactAlreadyExists = findExistedName(name);
 
+    if (contactAlreadyExists) {
+      alert(`${name} already exists`);
+      return;
+    }
     dispatch(addContact({ name, number }));
 
     setName('');
     setNumber('');
-  };
-
-  const addContacts = ({ name, number }) => {
-    const contactAlreadyExists = findExistedName(name);
-
-    if (contactAlreadyExists === false) {
-      dispatch(addContact({ name, number }));
-    } else {
-      alert(`${name} already exists`);
-    }
   };
 
   const findExistedName = name => {
