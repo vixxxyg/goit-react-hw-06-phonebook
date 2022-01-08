@@ -31,7 +31,7 @@ export default function ContactForm({ onSubmit }) {
 
   const handleSubmit = e => {
     e.preventDefault();
-    const nameInContact = name.toLowerCase().trim();
+    // const nameInContact = name.toLowerCase().trim();
     const contactAlreadyExists = findExistedName(name);
 
     if (contactAlreadyExists) {
