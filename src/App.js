@@ -1,75 +1,81 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import ContactForm from './components/ContactForm';
 import ContactList from './components/ContactList';
 import Filter from './components/Filter';
 import Section from './components/Section';
-import shortid from 'shortid';
+import { useSelector, useDispatch } from 'react-redux';
+import { getFilter } from './redux/contacts/contacts-selectors';
+import { getContacts } from './redux/contacts/contacts-selectors';
+import {
+  addContact,
+  deleteContact,
+  localstorageContacts,
+} from './redux/contacts/contacts-actions';
 
 export default function App() {
-  const [contacts, setContacts] = useState([]);
-  const [filter, setFilter] = useState('');
+  const dispatch = useDispatch();
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
 
   useEffect(() => {
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
-    if (parsedContacts) {
-      setContacts(parsedContacts);
+    const contactsInStorage = localStorage.getItem('contacts');
+
+    if (contactsInStorage) {
+      dispatch(localstorageContacts(JSON.parse(contactsInStorage)));
     }
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     localStorage.setItem('contacts', JSON.stringify(contacts));
   }, [contacts]);
 
-  const submitForm = ({ name, number }) => {
-    const contact = {
-      id: shortid.generate(),
-      name,
-      number,
-    };
+  const addContacts = ({ name, number }) => {
+    const contactAlreadyExists = findExistedName(name);
 
-    if (contactAlreadyExists(name)) {
-      alert(`${name} already exists`);
-      return;
+    if (contactAlreadyExists === false) {
+      dispatch(addContact({ name, number }));
     } else {
-      setContacts([contact, ...contacts]);
+      alert(`${name} already exists`);
     }
   };
 
-  const contactAlreadyExists = name => {
-    name = name.toLowerCase();
-    return (
-      contacts.filter(contact => contact.name.toLowerCase().includes(name))
-        .length > 0
-    );
+  const findExistedName = name => {
+    let existedName = false;
+    for (let i = 0; i < contacts.length; i += 1) {
+      const normalizeContactsName = contacts[i].name.toLowerCase();
+      const normalizeName = name.toLowerCase();
+      if (normalizeContactsName === normalizeName) {
+        return (existedName = true);
+      } else {
+        existedName = false;
+      }
+    }
+    return existedName;
   };
 
-  const getFilteredContacts = () => {
+  const deleteContacts = contactId => {
+    dispatch(deleteContact({ contactId }));
+  };
+
+  const searchContactByName = () => {
     const normalizedFilter = filter.toLowerCase();
 
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(normalizedFilter),
     );
   };
-
-  const deleteContact = contactId => {
-    setContacts(prev => prev.filter(contact => contact.id !== contactId));
-  };
-
-  const changeFilter = event => {
-    setFilter(event.currentTarget.value);
-  };
+  const concurrentContact = searchContactByName();
 
   return (
     <>
       <Section title="Phonebook">
-        <ContactForm onSubmit={submitForm}></ContactForm>
+        <ContactForm onSubmit={addContacts}></ContactForm>
       </Section>
       <Section title="Contacts">
-        <Filter onChange={changeFilter} />
+        <Filter />
         <ContactList
-          contacts={getFilteredContacts()}
-          onDeleteContact={deleteContact}
+          contacts={concurrentContact}
+          onDeleteContact={deleteContacts}
         ></ContactList>
       </Section>
     </>
