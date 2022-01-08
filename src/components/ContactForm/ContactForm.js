@@ -29,9 +29,8 @@ export default function ContactForm({ onSubmit }) {
     }
   };
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    // const nameInContact = name.toLowerCase().trim();
+  const handleSubmit = event => {
+    event.preventDefault();
     const contactAlreadyExists = findExistedName(name);
 
     if (contactAlreadyExists) {
