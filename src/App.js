@@ -6,11 +6,7 @@ import Section from './components/Section';
 import { useSelector, useDispatch } from 'react-redux';
 import { getFilter } from './redux/contacts/contacts-selectors';
 import { getContacts } from './redux/contacts/contacts-selectors';
-import {
-  addContact,
-  deleteContact,
-  localstorageContacts,
-} from './redux/contacts/contacts-actions';
+import { localstorageContacts } from './redux/contacts/contacts-actions';
 
 export default function App() {
   const dispatch = useDispatch();
@@ -29,34 +25,6 @@ export default function App() {
     localStorage.setItem('contacts', JSON.stringify(contacts));
   }, [contacts]);
 
-  const addContacts = ({ name, number }) => {
-    const contactAlreadyExists = findExistedName(name);
-
-    if (contactAlreadyExists === false) {
-      dispatch(addContact({ name, number }));
-    } else {
-      alert(`${name} already exists`);
-    }
-  };
-
-  const findExistedName = name => {
-    let existedName = false;
-    for (let i = 0; i < contacts.length; i += 1) {
-      const normalizeContactsName = contacts[i].name.toLowerCase();
-      const normalizeName = name.toLowerCase();
-      if (normalizeContactsName === normalizeName) {
-        return (existedName = true);
-      } else {
-        existedName = false;
-      }
-    }
-    return existedName;
-  };
-
-  const deleteContacts = contactId => {
-    dispatch(deleteContact({ contactId }));
-  };
-
   const searchContactByName = () => {
     const normalizedFilter = filter.toLowerCase();
 
@@ -69,14 +37,11 @@ export default function App() {
   return (
     <>
       <Section title="Phonebook">
-        <ContactForm onSubmit={addContacts}></ContactForm>
+        <ContactForm></ContactForm>
       </Section>
       <Section title="Contacts">
         <Filter />
-        <ContactList
-          contacts={concurrentContact}
-          onDeleteContact={deleteContacts}
-        ></ContactList>
+        <ContactList contacts={concurrentContact}></ContactList>
       </Section>
     </>
   );

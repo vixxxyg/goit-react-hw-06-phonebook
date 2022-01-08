@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import s from './ContactForm.module.css';
 import shortid from 'shortid';
+import { useDispatch, useSelector } from 'react-redux';
+import { getContacts } from '../../redux/contacts/contacts-selectors.js';
+import { addContact } from '../../redux/contacts/contacts-actions';
 
 export default function ContactForm({ onSubmit }) {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
-
+  const contacts = useSelector(getContacts);
+  const dispatch = useDispatch();
   const nameInputId = shortid.generate();
   const numberInputId = shortid.generate();
 
@@ -28,10 +32,34 @@ export default function ContactForm({ onSubmit }) {
   const handleSubmit = event => {
     event.preventDefault();
 
-    onSubmit({ name, number });
+    dispatch(addContact({ name, number }));
 
     setName('');
     setNumber('');
+  };
+
+  const addContacts = ({ name, number }) => {
+    const contactAlreadyExists = findExistedName(name);
+
+    if (contactAlreadyExists === false) {
+      dispatch(addContact({ name, number }));
+    } else {
+      alert(`${name} already exists`);
+    }
+  };
+
+  const findExistedName = name => {
+    let existedName = false;
+    for (let i = 0; i < contacts.length; i += 1) {
+      const normalizeContactsName = contacts[i].name.toLowerCase();
+      const normalizeName = name.toLowerCase();
+      if (normalizeContactsName === normalizeName) {
+        return (existedName = true);
+      } else {
+        existedName = false;
+      }
+    }
+    return existedName;
   };
 
   return (
